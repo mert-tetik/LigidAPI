@@ -2,20 +2,24 @@
 #include <string.h>
 
 #include "../Headers/Canvas.h"
+#include "../Headers/OpenGL_specific.h"
 
 #ifndef LIGIDAPI_MAX_CANVAS_SIZE 
 #define LIGIDAPI_MAX_CANVAS_SIZE 20
 #endif
 
 static int canvas_creation_index = -1;
-LigidCanvas canvases[LIGIDAPI_MAX_CANVAS_SIZE];
+static LigidCanvas canvases[LIGIDAPI_MAX_CANVAS_SIZE];
 
-LigidCanvas* LigidAPI_create_canvas(int width, int height, int channels){
+LigidCanvas* LigidAPI_create_canvas(int width, int height, int channels, LigidRGBA canvas_color){
     // Create the canvas
     LigidCanvas canvas;
     canvas.width = width;
     canvas.height = height;
     canvas.channels = channels;
+
+    canvas.opengl_texture_buffer_ID = 0;
+    canvas.opengl_texture_buffer_ID = LigidAPIUtil_createTexture(0, width, height, channels);
 
     canvas_creation_index++;
 
@@ -65,6 +69,11 @@ LigidRGBA LigidAPI_get_color(float r, float g, float b, float a){
     color.g = g; 
     color.b = b; 
     color.a = a; 
+    
+    color.r_u = (unsigned char)(r * 255.f); 
+    color.g_u = (unsigned char)(g * 255.f); 
+    color.b_u = (unsigned char)(b * 255.f); 
+    color.a_u = (unsigned char)(a * 255.f); 
 
     return color;
 }

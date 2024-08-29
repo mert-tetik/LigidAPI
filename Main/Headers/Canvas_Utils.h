@@ -24,6 +24,11 @@ typedef struct{
     float g;
     float b;
     float a;
+    
+    unsigned char r_u;
+    unsigned char g_u;
+    unsigned char b_u;
+    unsigned char a_u;
 } LigidRGBA;
 
 LigidBrush LigidAPI_create_brush(float radius, float hardness, float opacity, float spacing, float sizeJitter, float scatter, 

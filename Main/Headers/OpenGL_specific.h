@@ -123,10 +123,6 @@ extern "C" {
         // Bind the shader program
         glUseProgram(shaderProgram);
 
-        // Bind the input texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-
         // Define a full-screen quad (two triangles)
         float quadVertices[] = {
             // Positions      // TexCoords
@@ -226,11 +222,48 @@ extern "C" {
 
         glViewport(0, 0, width, height);
         glClearColor(r, g, b, a);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         // Unbind the framebuffer to return to the default framebuffer
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // Cleanup
         glDeleteFramebuffers(1, &framebuffer);
+    }
+
+    void LigidAPIUtil_useProgram(unsigned int program){
+        glUseProgram(program);
+    }
+
+    void LigidAPIUtil_uniformTexture(unsigned int program, const char* location, int slot, unsigned int texture){
+        glUniform1i(glGetUniformLocation(program, location), slot); glActiveTexture(GL_TEXTURE0 + slot); glBindTexture(GL_TEXTURE_2D, texture);
+    }
+    void LigidAPIUtil_uniformint(unsigned int program, const char* location, int value){
+        glUniform1i(glGetUniformLocation(program, location), value);
+    }
+    void LigidAPIUtil_uniform1f(unsigned int program, const char* location, float value){
+        glUniform1f(glGetUniformLocation(program, location), value);
+    }
+    void LigidAPIUtil_uniform2f(unsigned int program, const char* location, float value1, float value2){
+        glUniform2f(glGetUniformLocation(program, location), value1, value2);
+    }
+    void LigidAPIUtil_uniform3f(unsigned int program, const char* location, float value1, float value2, float value3){
+        glUniform3f(glGetUniformLocation(program, location), value1, value2, value3);
+    }
+
+    void LigidAPIUtil_copyPixelData(unsigned int from, unsigned int to, int width, int height){
+        //Copy the texture
+        unsigned int duplicate_FBO;
+        glGenFramebuffers(1, &duplicate_FBO);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, duplicate_FBO);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, from, 0);
+
+        // Bind the requested texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, to);
+
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, width, height, 0);
+        glDeleteFramebuffers(1, &duplicate_FBO);
     }
 
     #else
@@ -239,6 +272,16 @@ extern "C" {
     unsigned int LigidAPIUtil_load_shader_OpenGL(const char* vertexCode, const char* fragmentCode);
     int LigidAPIUtil_applyFilter(unsigned int texture, unsigned int shaderProgram, unsigned int width, unsigned int height, unsigned int filter_texture, unsigned int filter_width, unsigned int filter_height);
     unsigned int LigidAPIUtil_createTexture(unsigned char* pxs, int width, int height, int channels);
+    void LigidAPIUtil_clearTexture(unsigned int texture, int width, int height, float r, float g, float b, float a);
+
+    void LigidAPIUtil_useProgram(unsigned int program);
+    void LigidAPIUtil_uniformTexture(unsigned int program, const char* location, int slot, unsigned int texture);
+    void LigidAPIUtil_uniformint(unsigned int program, const char* location, int value);
+    void LigidAPIUtil_uniform1f(unsigned int program, const char* location, float value);
+    void LigidAPIUtil_uniform2f(unsigned int program, const char* location, float value1, float value2);
+    void LigidAPIUtil_uniform3f(unsigned int program, const char* location, float value1, float value2, float value3);
+
+    void LigidAPIUtil_copyPixelData(unsigned int from, unsigned int to, int width, int height);
 
     #endif
 

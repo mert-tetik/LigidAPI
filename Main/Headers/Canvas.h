@@ -13,6 +13,7 @@ typedef struct{
     int height;
     int channels;
     unsigned int opengl_texture_buffer_ID;
+    unsigned int opengl_texture_buffer_ID_copy;
 
 } LigidCanvas;
 

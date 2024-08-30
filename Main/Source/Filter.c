@@ -1,5 +1,3 @@
-#include <glad/glad.h>
-
 #include "../Headers/Filter.h"
 #include "../Headers/OpenGL_specific.h"
 
@@ -54,13 +52,13 @@ int LigidAPI_apply_filter(
                     ,filter->shader);
     }
 
-    glUseProgram(filter->ID);
-    glUniform1i(glGetUniformLocation(filter->ID, "txtr"), 0);
-    glUniform1f(glGetUniformLocation(filter->ID, "variable_1"), variable_1);
-    glUniform1f(glGetUniformLocation(filter->ID, "variable_2"), variable_2);
-    glUniform1f(glGetUniformLocation(filter->ID, "variable_3"), variable_3);
-    glUniform1f(glGetUniformLocation(filter->ID, "variable_4"), variable_4);
-    glUniform1f(glGetUniformLocation(filter->ID, "variable_5"), variable_5);
+    LigidAPIUtil_useProgram(filter->ID);
+    LigidAPIUtil_uniformTexture(filter->ID, "txtr", 0, texture);
+    LigidAPIUtil_uniform1f(filter->ID, "variable_1", variable_1);
+    LigidAPIUtil_uniform1f(filter->ID, "variable_2", variable_2);
+    LigidAPIUtil_uniform1f(filter->ID, "variable_3", variable_3);
+    LigidAPIUtil_uniform1f(filter->ID, "variable_4", variable_4);
+    LigidAPIUtil_uniform1f(filter->ID, "variable_5", variable_5);
 
     return LigidAPIUtil_applyFilter(texture, filter->ID, width, height, filter_texture, filter_width, filter_height);
 }

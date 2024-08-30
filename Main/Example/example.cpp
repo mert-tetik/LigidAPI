@@ -97,6 +97,34 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+bool mouse_clicked = false;
+bool mouse_released = false;
+bool mouse_pressed = false;
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    // Check if the left mouse button was pressed
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            mouse_clicked = true;
+            mouse_pressed = true;
+        } else if (action == GLFW_RELEASE) {
+            mouse_pressed = false;
+        }
+    }
+}
+
+ImVec2 display_pos;
+ImVec2 display_scale;
+void RenderImageWithTracking(ImTextureID texture_id, const ImVec2& image_size) {
+
+    // Render the image
+    ImVec2 image_pos = ImGui::GetCursorScreenPos(); // Get the position where the image will be rendered
+    ImGui::Image(texture_id, image_size);
+
+    // After rendering, get the size of the last item (which is the image)
+    display_scale = ImGui::GetItemRectSize(); // Get the actual size of the image
+    display_pos = ImGui::GetItemRectMin();  // Get the actual position of the image
+}
+
 // Main code
 int main(int, char**)
 {
@@ -128,7 +156,9 @@ int main(int, char**)
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "LigidAPI Interface", nullptr, nullptr);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -218,11 +248,7 @@ int main(int, char**)
     while (!glfwWindowShouldClose(window))
 #endif
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+        mouse_clicked = false;
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -232,7 +258,7 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            ImGui::Begin("LigidAPI Interface");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("LigidAPI Interface");
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 
@@ -242,6 +268,8 @@ int main(int, char**)
             ImGui::ListBox("Features", &selected_feature, feature_items, features_items_count, -1);               // Display some text (you can use a format strings too)
             
             GLuint displayed_texture = filter_buffer;
+            GLuint displayed_texture_w = my_image_width;
+            GLuint displayed_texture_h = my_image_height;
 
             if(selected_feature == 0){
                 const int filter_items_count = 4;             
@@ -294,12 +322,35 @@ int main(int, char**)
             }
             else if(selected_feature == 2){
                 // Create the canvas
-                static LigidCanvas* canvas = LigidAPI_create_canvas(1080, 1080, 4, LigidAPI_get_color(0.7f, 0.f, 0.3f, 1.f));
+                static LigidCanvas* canvas = LigidAPI_create_canvas(1024, 1024, 4, LigidAPI_get_color(0.f, 0.f, 0.f, 0.f));
     
+                static double cursor_x = 0, cursor_y = 0, last_cursor_x = 0, last_cursor_y = 0;
+                
+                last_cursor_x = cursor_x;
+                last_cursor_y = cursor_y;
+                
+                if(mouse_pressed){
+                    glfwGetCursorPos(window, &cursor_x, &cursor_y);
+                }                
+
+                LigidArea render_area;
+                render_area.pos_x = display_pos.x;
+                render_area.pos_y = display_pos.y;
+                render_area.width = display_scale.x;
+                render_area.height = display_scale.y;
+                LigidArea screen_area;
+                screen_area.pos_x = 0;
+                screen_area.pos_y = 0;
+                screen_area.width = canvas->width;
+                screen_area.height = canvas->height;
+
                 LigidBrush brush = LigidAPI_create_brush(0.01f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0);
-                LigidAPI_paint_canvas(canvas, brush, LigidAPI_get_stroke(0.5f, 0.5f, 0.7f, 0.7f), LigidAPI_get_color(0.7f, 0.f, 0.3f, 1.f));    
+                LigidStroke stroke = LigidAPI_project_stroke_to_render_area(LigidAPI_get_stroke(cursor_x, cursor_y, last_cursor_x, last_cursor_y), render_area, screen_area);
+                LigidAPI_paint_canvas(canvas, brush, stroke, LigidAPI_get_color(1.f, 1.f, 1.f, 1.f));    
 
                 displayed_texture = canvas->opengl_texture_buffer_ID;
+                displayed_texture_w = 1024;
+                displayed_texture_h = 1024;
 
                 //LigidAPI_delete_canvas(canvas);
             }
@@ -311,7 +362,7 @@ int main(int, char**)
 
             //ImGui::SameLine();
 
-            ImGui::Image((void*)(intptr_t)displayed_texture, ImVec2(my_image_width, my_image_height));
+            RenderImageWithTracking((void*)(intptr_t)displayed_texture, ImVec2(displayed_texture_w/2, displayed_texture_h/2));
 
             ImGui::End();
         }

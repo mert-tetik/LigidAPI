@@ -188,7 +188,7 @@ int main(int, char**)
 
     colors[ImGuiCol_Text]                   = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     colors[ImGuiCol_TextDisabled]           = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-    colors[ImGuiCol_WindowBg]               = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
+    colors[ImGuiCol_WindowBg]               = ImVec4(0.74f, 0.74f, 0.74f, 1.00f);
     colors[ImGuiCol_ChildBg]                = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
     colors[ImGuiCol_PopupBg]                = ImVec4(1.00f, 1.00f, 1.00f, 0.98f);
     colors[ImGuiCol_Border]                 = ImVec4(0.00f, 0.00f, 0.00f, 0.30f);
@@ -204,7 +204,7 @@ int main(int, char**)
     colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.69f, 0.69f, 0.69f, 0.80f);
     colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.49f, 0.49f, 0.49f, 0.80f);
     colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
-    colors[ImGuiCol_CheckMark]              = theme_color;
+    colors[ImGuiCol_CheckMark]              = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
     colors[ImGuiCol_SliderGrab]             = theme_color;
     colors[ImGuiCol_SliderGrabActive]       = theme_color;
     colors[ImGuiCol_Button]                 = theme_color;
@@ -266,8 +266,14 @@ int main(int, char**)
     int my_image_width = 0;
     int my_image_height = 0;
     GLuint my_image_texture = 0;
-    bool ret = LoadTextureFromFile("./Main/Example/Resources/image.jpg", &my_image_texture, &my_image_width, &my_image_height);
-    IM_ASSERT(ret);
+    bool image_ret = LoadTextureFromFile("./Main/Example/Resources/image.jpg", &my_image_texture, &my_image_width, &my_image_height);
+    IM_ASSERT(image_ret);
+    
+    int logo_width = 0;
+    int logo_height = 0;
+    GLuint logo_texture = 0;
+    bool logo_ret = LoadTextureFromFile("./Main/Example/Resources/LigidAPI.png", &logo_texture, &logo_width, &logo_height);
+    IM_ASSERT(logo_ret);
     
     // Creating filter texture
     GLuint filter_buffer = 0;
@@ -322,6 +328,8 @@ int main(int, char**)
             ImGui::SetWindowPos(ImVec2(0, 0));
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+
+            ImGui::Image((void*)(intptr_t)logo_texture, ImVec2(150, 150));
 
             const int features_items_count = 4;             
             const char *const feature_items[features_items_count] = {"Filtering", "Mixing", "Painting", "Rendering"};
@@ -386,7 +394,7 @@ int main(int, char**)
                 ImGui::ColorEdit4("Painting Color", (float*)&painting_color);
 
                 // Create the canvas
-                static LigidCanvas* canvas = LigidAPI_create_canvas(1024, 1024, 4, LigidAPI_get_color(0.f, 0.f, 0.f, 0.f));
+                static LigidCanvas* canvas = LigidAPI_create_canvas(1024, 1024, 4, LigidAPI_get_color(0.f, 0.f, 0.f, 0.2f));
     
                 static double cursor_x = 0, cursor_y = 0, last_cursor_x = 0, last_cursor_y = 0;
                 
@@ -426,7 +434,7 @@ int main(int, char**)
 
             //ImGui::SameLine();
 
-            RenderImageWithTracking((void*)(intptr_t)displayed_texture, ImVec2(displayed_texture_w/2, displayed_texture_h/2));
+            RenderImageWithTracking((void*)(intptr_t)displayed_texture, ImVec2(displayed_texture_w, displayed_texture_h));
 
             // Check if the image is being hovered
             bool isImageHovered = ImGui::IsItemHovered();

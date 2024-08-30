@@ -57,9 +57,10 @@ static float distance(float x1, float y1, float x2, float y2) {
 }
 
 
-static int get_whole_stroke(LigidAPI_vec2* positions, LigidStroke stroke)
+static void get_whole_stroke(LigidAPI_vec2 positions[20][80], LigidStroke stroke, int* position_i, int* position_ii)
 {
     int positions_i = 0;
+    int positions_ii = 0;
 
     LigidAPI_vec2 start;
     start.x = stroke.start_pos_x;
@@ -69,7 +70,7 @@ static int get_whole_stroke(LigidAPI_vec2* positions, LigidStroke stroke)
     dest.x = stroke.end_pos_x;
     dest.y = stroke.end_pos_y;
     
-    positions[positions_i] = start;
+    positions[positions_ii][positions_i] = start;
     positions_i++;
     
     //----------------------PAINTING----------------------\\
@@ -86,12 +87,19 @@ static int get_whole_stroke(LigidAPI_vec2* positions, LigidStroke stroke)
         
         LigidAPI_vec2 strokeLocation = start;
         if(positions_i < 80){
-            positions[positions_i] = strokeLocation;
+            positions[positions_ii][positions_i] = strokeLocation;
             positions_i++;
+        }
+        else{
+            positions_i = 0;
+            positions_ii++;
+            
+            positions[positions_ii][positions_i] = strokeLocation;
         }
     }
 
-    return positions_i;
+    *position_i = positions_i;
+    *position_ii = positions_ii;
 }
 
 static unsigned int paint_program;
@@ -164,35 +172,43 @@ int LigidAPI_paint_canvas(LigidCanvas* canvas, LigidBrush brush, LigidStroke str
                     fragmentShaderSource);
     }
     
-    LigidAPIUtil_useProgram(paint_program);
-    LigidAPIUtil_uniformTexture(paint_program, "bgTxtr", 0, canvas->opengl_texture_buffer_ID_copy);
-    LigidAPIUtil_uniformint(paint_program, "eraser", 0); 
-    LigidAPIUtil_uniform1f(paint_program, "opacity", 1.f);
-    LigidAPIUtil_uniform1f(paint_program, "brush.radius", brush.radius);
-    LigidAPIUtil_uniform1f(paint_program, "brush.hardness", brush.hardness);
-    LigidAPIUtil_uniform2f(paint_program, "paintingRes", canvas->width, canvas->height);
-    LigidAPIUtil_uniform2f(paint_program, "videoScale", canvas->width, canvas->height);
-    LigidAPIUtil_uniform3f(paint_program, "paint_color", color.r, color.g, color.b);
-
-    LigidAPI_vec2 positions[80];
-
-    int pos_count = get_whole_stroke(positions, stroke);
-
-
-    LigidAPIUtil_uniformint(paint_program, "posCount", pos_count);
+    int position_i = 0;
+    int position_ii = 0;
+    LigidAPI_vec2 positions[20][80];
+    get_whole_stroke(positions, stroke, &position_i, &position_ii);
     
-    char uniform_name[32];
-    for (int i = 0; i < pos_count; i++) {
-        // Construct the uniform name
-        sprintf(uniform_name, "positions[%zu]", i);
+    for (size_t ii = 0; ii < position_ii+1; ii++)
+    {
+        int pos_count = 80;
+        if(ii == position_ii)
+            pos_count = position_i; 
+            
+        LigidAPIUtil_useProgram(paint_program);
+        LigidAPIUtil_uniformTexture(paint_program, "bgTxtr", 0, canvas->opengl_texture_buffer_ID_copy);
+        LigidAPIUtil_uniformint(paint_program, "eraser", 0); 
+        LigidAPIUtil_uniform1f(paint_program, "opacity", 1.f);
+        LigidAPIUtil_uniform1f(paint_program, "brush.radius", brush.radius);
+        LigidAPIUtil_uniform1f(paint_program, "brush.hardness", brush.hardness);
+        LigidAPIUtil_uniform2f(paint_program, "paintingRes", canvas->width, canvas->height);
+        LigidAPIUtil_uniform2f(paint_program, "videoScale", canvas->width, canvas->height);
+        LigidAPIUtil_uniform3f(paint_program, "paint_color", color.r, color.g, color.b);
 
-        // Call the function with the constructed uniform name
-        LigidAPIUtil_uniform2f(paint_program, uniform_name, positions[i].x, positions[i].y);
+        LigidAPIUtil_uniformint(paint_program, "posCount", pos_count);
+        
+        char uniform_name[32];
+        for (int i = 0; i < pos_count; i++) {
+            // Construct the uniform name
+            sprintf(uniform_name, "positions[%zu]", i);
+
+            // Call the function with the constructed uniform name
+            LigidAPIUtil_uniform2f(paint_program, uniform_name, positions[ii][i].x, positions[ii][i].y);
+        }
+
+        LigidAPIUtil_copyPixelData(canvas->opengl_texture_buffer_ID, canvas->opengl_texture_buffer_ID_copy, canvas->width, canvas->height);
+        
+        LigidAPIUtil_applyFilter(canvas->opengl_texture_buffer_ID_copy, paint_program, canvas->width, canvas->height, canvas->opengl_texture_buffer_ID, canvas->width, canvas->height);
     }
-
-    LigidAPIUtil_copyPixelData(canvas->opengl_texture_buffer_ID, canvas->opengl_texture_buffer_ID_copy, canvas->width, canvas->height);
     
-    return LigidAPIUtil_applyFilter(canvas->opengl_texture_buffer_ID_copy, paint_program, canvas->width, canvas->height, canvas->opengl_texture_buffer_ID, canvas->width, canvas->height);
 
     return 1;
 } 

@@ -393,6 +393,19 @@ int main(int, char**)
                 static ImVec4 painting_color;
                 ImGui::ColorEdit4("Painting Color", (float*)&painting_color);
 
+                static LigidBrush brush = {0.f,0.f,0.f,0.f,0.f,0.f,0.f,0.f,0.f,0.f,0};
+
+                ImGui::SliderFloat("radius", &brush.radius, 0.0f, 1.0f);
+                ImGui::SliderFloat("hardness", &brush.hardness, 0.0f, 1.0f);
+                ImGui::SliderFloat("opacity", &brush.opacity, 0.0f, 1.0f);
+                ImGui::SliderFloat("spacing", &brush.spacing, 0.0f, 1.0f);
+                ImGui::SliderFloat("sizeJitter", &brush.sizeJitter, 0.0f, 1.0f);
+                ImGui::SliderFloat("scatter", &brush.scatter, 0.0f, 1.0f);
+                ImGui::SliderFloat("fade", &brush.fade, 0.0f, 1.0f);
+                ImGui::SliderFloat("rotation", &brush.rotation, 0.0f, 1.0f);
+                ImGui::SliderFloat("rotationJitter", &brush.rotationJitter, 0.0f, 1.0f);
+                ImGui::SliderFloat("alphaJitter", &brush.alphaJitter, 0.0f, 1.0f);
+
                 // Create the canvas
                 static LigidCanvas* canvas = LigidAPI_create_canvas(1024, 1024, 4, LigidAPI_get_color(0.f, 0.f, 0.f, 0.2f));
     
@@ -403,28 +416,29 @@ int main(int, char**)
                 
                 if(mouse_pressed){
                     glfwGetCursorPos(window, &cursor_x, &cursor_y);
-                }                
+                    
+                    LigidArea render_area;
+                    render_area.pos_x = display_pos.x;
+                    render_area.pos_y = display_pos.y;
+                    render_area.width = display_scale.x;
+                    render_area.height = display_scale.y;
+                    LigidArea screen_area;
+                    screen_area.pos_x = 0;
+                    screen_area.pos_y = 0;
+                    screen_area.width = canvas->width;
+                    screen_area.height = canvas->height;
 
-                LigidArea render_area;
-                render_area.pos_x = display_pos.x;
-                render_area.pos_y = display_pos.y;
-                render_area.width = display_scale.x;
-                render_area.height = display_scale.y;
-                LigidArea screen_area;
-                screen_area.pos_x = 0;
-                screen_area.pos_y = 0;
-                screen_area.width = canvas->width;
-                screen_area.height = canvas->height;
+                    LigidStroke stroke = LigidAPI_project_stroke_to_render_area(LigidAPI_get_stroke(cursor_x, cursor_y, last_cursor_x, last_cursor_y), render_area, screen_area);
+                    LigidAPI_paint_canvas(canvas, brush, stroke, LigidAPI_get_color(painting_color.x, painting_color.y, painting_color.z, painting_color.w));    
 
-                LigidBrush brush = LigidAPI_create_brush(0.01f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0);
-                LigidStroke stroke = LigidAPI_project_stroke_to_render_area(LigidAPI_get_stroke(cursor_x, cursor_y, last_cursor_x, last_cursor_y), render_area, screen_area);
-                LigidAPI_paint_canvas(canvas, brush, stroke, LigidAPI_get_color(painting_color.x, painting_color.y, painting_color.z, painting_color.w));    
-
+                }  
+                else{
+                    glfwGetCursorPos(window, &cursor_x, &cursor_y);
+                }              
+                
                 displayed_texture = canvas->opengl_texture_buffer_ID;
                 displayed_texture_w = 1024;
                 displayed_texture_h = 1024;
-
-                //LigidAPI_delete_canvas(canvas);
             }
 
             //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state

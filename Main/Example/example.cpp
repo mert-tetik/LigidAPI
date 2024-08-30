@@ -179,7 +179,61 @@ int main(int, char**)
 
     // Setup Dear ImGui style
     //ImGui::StyleColorsDark();
-   
+    ImGui::StyleColorsLight();
+    
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    ImVec4 theme_color = ImVec4(0.89f, 0.73f, 0.31f, 1.f); 
+
+    colors[ImGuiCol_Text]                   = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    colors[ImGuiCol_TextDisabled]           = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+    colors[ImGuiCol_WindowBg]               = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
+    colors[ImGuiCol_ChildBg]                = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_PopupBg]                = ImVec4(1.00f, 1.00f, 1.00f, 0.98f);
+    colors[ImGuiCol_Border]                 = ImVec4(0.00f, 0.00f, 0.00f, 0.30f);
+    colors[ImGuiCol_BorderShadow]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_FrameBg]                = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered]         = theme_color;
+    colors[ImGuiCol_FrameBgActive]          = theme_color;
+    colors[ImGuiCol_TitleBg]                = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
+    colors[ImGuiCol_TitleBgActive]          = ImVec4(0.82f, 0.82f, 0.82f, 1.00f);
+    colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
+    colors[ImGuiCol_MenuBarBg]              = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
+    colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
+    colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.69f, 0.69f, 0.69f, 0.80f);
+    colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.49f, 0.49f, 0.49f, 0.80f);
+    colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
+    colors[ImGuiCol_CheckMark]              = theme_color;
+    colors[ImGuiCol_SliderGrab]             = theme_color;
+    colors[ImGuiCol_SliderGrabActive]       = theme_color;
+    colors[ImGuiCol_Button]                 = theme_color;
+    colors[ImGuiCol_ButtonHovered]          = theme_color;
+    colors[ImGuiCol_ButtonActive]           = theme_color;
+    colors[ImGuiCol_Header]                 = theme_color;
+    colors[ImGuiCol_HeaderHovered]          = theme_color;
+    colors[ImGuiCol_HeaderActive]           = theme_color;
+    colors[ImGuiCol_Separator]              = ImVec4(0.39f, 0.39f, 0.39f, 0.62f);
+    colors[ImGuiCol_SeparatorHovered]       = theme_color;
+    colors[ImGuiCol_SeparatorActive]        = theme_color;
+    colors[ImGuiCol_ResizeGrip]             = ImVec4(0.35f, 0.35f, 0.35f, 0.17f);
+    colors[ImGuiCol_ResizeGripHovered]      = theme_color;
+    colors[ImGuiCol_ResizeGripActive]       = theme_color;
+    colors[ImGuiCol_TabDimmedSelectedOverline] = theme_color;
+    colors[ImGuiCol_PlotLines]              = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+    colors[ImGuiCol_PlotLinesHovered]       = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+    colors[ImGuiCol_PlotHistogram]          = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+    colors[ImGuiCol_PlotHistogramHovered]   = ImVec4(1.00f, 0.45f, 0.00f, 1.00f);
+    colors[ImGuiCol_TableHeaderBg]          = theme_color;
+    colors[ImGuiCol_TableBorderStrong]      = theme_color;
+    colors[ImGuiCol_TableBorderLight]       = theme_color;
+    colors[ImGuiCol_TableRowBg]             = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_TableRowBgAlt]          = ImVec4(0.30f, 0.30f, 0.30f, 0.09f);
+    colors[ImGuiCol_TextSelectedBg]         = theme_color;
+    colors[ImGuiCol_DragDropTarget]         = theme_color;
+    colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(0.70f, 0.70f, 0.70f, 0.70f);
+    colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
+    colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);

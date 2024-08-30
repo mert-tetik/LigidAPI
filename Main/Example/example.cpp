@@ -178,8 +178,8 @@ int main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    //ImGui::StyleColorsDark();
+   
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -208,7 +208,6 @@ int main(int, char**)
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     int my_image_width = 0;
     int my_image_height = 0;
@@ -258,7 +257,15 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            ImGui::Begin("LigidAPI Interface");
+            static bool x = false;
+            ImGui::Begin("LigidAPI Interface", &x, 4);
+            
+            // Get the size of the viewport
+            ImVec2 viewportSize = ImGui::GetIO().DisplaySize;
+
+            // Set the window size and position to cover the entire window
+            ImGui::SetWindowSize(viewportSize);
+            ImGui::SetWindowPos(ImVec2(0, 0));
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 
@@ -321,6 +328,9 @@ int main(int, char**)
                 }
             }
             else if(selected_feature == 2){
+                static ImVec4 painting_color;
+                ImGui::ColorEdit4("Painting Color", (float*)&painting_color);
+
                 // Create the canvas
                 static LigidCanvas* canvas = LigidAPI_create_canvas(1024, 1024, 4, LigidAPI_get_color(0.f, 0.f, 0.f, 0.f));
     
@@ -346,7 +356,7 @@ int main(int, char**)
 
                 LigidBrush brush = LigidAPI_create_brush(0.01f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0);
                 LigidStroke stroke = LigidAPI_project_stroke_to_render_area(LigidAPI_get_stroke(cursor_x, cursor_y, last_cursor_x, last_cursor_y), render_area, screen_area);
-                LigidAPI_paint_canvas(canvas, brush, stroke, LigidAPI_get_color(1.f, 1.f, 1.f, 1.f));    
+                LigidAPI_paint_canvas(canvas, brush, stroke, LigidAPI_get_color(painting_color.x, painting_color.y, painting_color.z, painting_color.w));    
 
                 displayed_texture = canvas->opengl_texture_buffer_ID;
                 displayed_texture_w = 1024;
@@ -363,6 +373,17 @@ int main(int, char**)
             //ImGui::SameLine();
 
             RenderImageWithTracking((void*)(intptr_t)displayed_texture, ImVec2(displayed_texture_w/2, displayed_texture_h/2));
+
+            // Check if the image is being hovered
+            bool isImageHovered = ImGui::IsItemHovered();
+
+            // Disable dragging if image is hovered
+            if (isImageHovered) {
+                ImGui::SetWindowPos(ImVec2(100, 100), ImGuiCond_Once); // Set position conditionally
+                ImGui::SetWindowSize(ImVec2(400, 300), ImGuiCond_Once); // Set size conditionally
+            } else {
+                // Optionally, you can handle dragging here
+            }
 
             ImGui::End();
         }
@@ -382,7 +403,7 @@ int main(int, char**)
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClearColor(1., 1., 1., 1.);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

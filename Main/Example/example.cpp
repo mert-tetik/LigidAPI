@@ -207,7 +207,7 @@ int main(int, char**)
     colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
     colors[ImGuiCol_CheckMark]              = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
     colors[ImGuiCol_SliderGrab]             = theme_color;
-    colors[ImGuiCol_SliderGrabActive]       = theme_color;
+    colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
     colors[ImGuiCol_Button]                 = theme_color;
     colors[ImGuiCol_ButtonHovered]          = theme_color;
     colors[ImGuiCol_ButtonActive]           = theme_color;

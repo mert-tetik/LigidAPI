@@ -25,6 +25,24 @@ LigidFilter LigidAPI_filter_invert = {
                                         0,0,0,0,0,0
                                     };
 
+LigidFilter LigidAPI_filter_brightness = {
+                                        "in vec2 TexCoords;"
+                                        "uniform sampler2D txtr;"
+                                        "uniform float variable_1;" // Brightness (-1.0 to 1.0)
+                                        "uniform float variable_2;" // Contrast (-1.0 to 1.0)
+                                        "uniform float variable_3;"
+                                        "uniform float variable_4;"
+                                        "uniform float variable_5;"
+                                        "out vec4 fragColor;"
+                                        "void main() {"
+                                        "    vec4 src = texture(txtr, vec2(TexCoords.x, TexCoords.y));"
+                                        "    src.rgb += variable_1;"
+                                        "    src.rgb = (src.rgb - 0.5) * (1.0 + variable_2) + 0.5;"
+                                        "    fragColor = src;"
+                                        "}",
+                                        0,0,0,0,0,0
+                                    };
+
 int LigidAPI_apply_filter(
                                         unsigned int texture, 
                                         unsigned int width, 
@@ -60,5 +78,5 @@ int LigidAPI_apply_filter(
     LigidAPIUtil_uniform1f(filter->ID, "variable_4", variable_4);
     LigidAPIUtil_uniform1f(filter->ID, "variable_5", variable_5);
 
-    return LigidAPIUtil_applyFilter(texture, filter->ID, width, height, filter_texture, filter_width, filter_height);
+    return LigidAPIUtil_applyFilter(filter_texture, filter_width, filter_height);
 }

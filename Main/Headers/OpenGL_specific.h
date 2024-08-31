@@ -97,10 +97,6 @@ extern "C" {
     }
 
     int LigidAPIUtil_applyFilter(
-                                            unsigned int texture, 
-                                            unsigned int shaderProgram, 
-                                            unsigned int width, 
-                                            unsigned int height, 
                                             unsigned int filter_texture, 
                                             unsigned int filter_width, 
                                             unsigned int filter_height
@@ -119,9 +115,6 @@ extern "C" {
             printf("Framebuffer is not complete!\n");
             return 0;
         }
-
-        // Bind the shader program
-        glUseProgram(shaderProgram);
 
         // Define a full-screen quad (two triangles)
         float quadVertices[] = {
@@ -270,7 +263,7 @@ extern "C" {
 
     void LigidAPIUtil_checkShaderCompileErrors(unsigned int shader, const char* type);
     unsigned int LigidAPIUtil_load_shader_OpenGL(const char* vertexCode, const char* fragmentCode);
-    int LigidAPIUtil_applyFilter(unsigned int texture, unsigned int shaderProgram, unsigned int width, unsigned int height, unsigned int filter_texture, unsigned int filter_width, unsigned int filter_height);
+    int LigidAPIUtil_applyFilter(unsigned int filter_texture, unsigned int filter_width, unsigned int filter_height);
     unsigned int LigidAPIUtil_createTexture(unsigned char* pxs, int width, int height, int channels);
     void LigidAPIUtil_clearTexture(unsigned int texture, int width, int height, float r, float g, float b, float a);
 

@@ -25,6 +25,11 @@ typedef struct{
     variable_4 = "1." if invert alpha channel
 */
 extern LigidFilter LigidAPI_filter_invert;
+/*!
+    variable_1 = brightness -1.f - 1.f
+    variable_1 = contrast -1.f - 1.f
+*/
+extern LigidFilter LigidAPI_filter_brightness;
 
 int LigidAPI_apply_filter(
                                         unsigned int texture, 

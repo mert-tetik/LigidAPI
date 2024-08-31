@@ -108,6 +108,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             mouse_pressed = true;
         } else if (action == GLFW_RELEASE) {
             mouse_pressed = false;
+            mouse_released = true;
         }
     }
 }
@@ -295,7 +296,7 @@ int main(int, char**)
     }
     
     // Init ligidapi
-    LigidAPI_init("OPENGL", "#version 400 core");
+    LigidAPI_init_OpenGL("#version 400 core \n");
 
     // Main loop
 #ifdef __EMSCRIPTEN__
@@ -308,6 +309,7 @@ int main(int, char**)
 #endif
     {
         mouse_clicked = false;
+        mouse_released = false;
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -371,6 +373,17 @@ int main(int, char**)
                     filter_var_4 = (float)invert_filter_invert_alpha;
                 }
                 
+                if(selected_filter == 3){
+                    static float brightness = 0.f, contrast = 0.f;
+                    ImGui::SliderFloat("Brightness", &brightness, -1.0f, 1.0f);
+                    ImGui::SliderFloat("Contrast", &contrast, -1.0f, 1.0f);
+                
+                    image_filter = &LigidAPI_filter_brightness;
+
+                    filter_var_1 = brightness;
+                    filter_var_2 = contrast;
+                }
+                
                 if(image_filter != nullptr){
                     // Filter texture via ligidapi
                     LigidAPI_apply_filter(
@@ -380,7 +393,7 @@ int main(int, char**)
                                                                 filter_buffer,
                                                                 filter_buffer_width,
                                                                 filter_buffer_height,
-                                                                &LigidAPI_filter_invert, 
+                                                                image_filter, 
                                                                 filter_var_1, 
                                                                 filter_var_2, 
                                                                 filter_var_3, 
@@ -396,7 +409,7 @@ int main(int, char**)
                 static LigidBrush brush = {0.f,0.f,0.f,0.f,0.f,0.f,0.f,0.f,0.f,0.f,0};
 
                 ImGui::SliderFloat("radius", &brush.radius, 0.0f, 1.0f);
-                ImGui::SliderFloat("hardness", &brush.hardness, 0.0f, 1.0f);
+                ImGui::SliderFloat("hardness", &brush.hardness, -5.0f, 5.0f);
                 ImGui::SliderFloat("opacity", &brush.opacity, 0.0f, 1.0f);
                 ImGui::SliderFloat("spacing", &brush.spacing, 0.0f, 1.0f);
                 ImGui::SliderFloat("sizeJitter", &brush.sizeJitter, 0.0f, 1.0f);
@@ -429,6 +442,7 @@ int main(int, char**)
                     screen_area.height = canvas->height;
 
                     LigidStroke stroke = LigidAPI_project_stroke_to_render_area(LigidAPI_get_stroke(cursor_x, cursor_y, last_cursor_x, last_cursor_y), render_area, screen_area);
+                    // Paint strokes
                     LigidAPI_paint_canvas(canvas, brush, stroke, LigidAPI_get_color(painting_color.x, painting_color.y, painting_color.z, painting_color.w));    
 
                 }  
@@ -436,7 +450,12 @@ int main(int, char**)
                     glfwGetCursorPos(window, &cursor_x, &cursor_y);
                 }              
                 
-                displayed_texture = canvas->opengl_texture_buffer_ID;
+                if(mouse_released){
+                    // Apply the painted stroke into the canvas
+                    LigidAPI_update_canvas(canvas, brush);
+                }
+                
+                displayed_texture = canvas->display_opengl_texture_buffer_ID;
                 displayed_texture_w = 1024;
                 displayed_texture_h = 1024;
             }
